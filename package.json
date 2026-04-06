@@ -1,0 +1,70 @@
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
+
+let overlayWindow;
+let controlWindow;
+
+function createOverlayWindow() {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+  overlayWindow = new BrowserWindow({
+    width: 720,
+    height: 200,
+    x: Math.floor((width - 720) / 2),
+    y: height - 240,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: true,
+    hasShadow: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  overlayWindow.loadFile('overlay.html');
+  overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+}
+
+function createControlWindow() {
+  const { width } = screen.getPrimaryDisplay().workAreaSize;
+
+  controlWindow = new BrowserWindow({
+    width: 400,
+    height: 620,
+    x: width - 420,
+    y: 40,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    resizable: false,
+    hasShadow: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  controlWindow.loadFile('control.html');
+  controlWindow.setAlwaysOnTop(true, 'screen-saver');
+}
+
+app.whenReady().then(() => {
+  createOverlayWindow();
+  createControlWindow();
+});
+
+app.on('window-all-closed', () => app.quit());
+
+ipcMain.on('speak', (event, data) => {
+  if (overlayWindow) overlayWindow.webContents.send('speak', data);
+  if (controlWindow) controlWindow.webContents.send('spoken', data);
+});
+
+ipcMain.on('settings', (event, data) => {
+  if (overlayWindow) overlayWindow.webContents.send('settings', data);
+});
+
+ipcMain.on('quit', () => app.quit());

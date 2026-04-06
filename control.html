@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #a78bfa;
+      --accent2: #f472b6;
+      --bg: rgba(10, 10, 18, 0.88);
+    }
+
+    body {
+      background: transparent;
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+
+    #wrap {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px 14px;
+    }
+
+    #box {
+      width: 100%;
+      background: var(--bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 18px;
+      border: 1px solid rgba(167,139,250,0.2);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Quick phrases */
+    #phrases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
+
+    .phrase-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(167,139,250,0.25);
+      background: rgba(167,139,250,0.08);
+      color: rgba(255,255,255,0.7);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-app-region: no-drag;
+    }
+
+    .phrase-btn:hover {
+      background: rgba(167,139,250,0.2);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .phrase-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Input row */
+    #input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      -webkit-app-region: no-drag;
+    }
+
+    #text-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      outline: none;
+      -webkit-app-region: no-drag;
+      transition: border-color 0.2s;
+    }
+
+    #text-input::placeholder { color: rgba(255,255,255,0.25); }
+    #text-input:focus { border-color: var(--accent); }
+
+    #speak-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    #speak-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+    #speak-btn:active { transform: scale(0.96); }
+    #speak-btn svg { width: 20px; height: 20px; }
+
+    /* Speaking indicator */
+    #speaking-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 0;
+    }
+
+    #speaking-bar.active { display: flex; }
+
+    .bar {
+      width: 3px;
+      border-radius: 3px;
+      background: var(--accent);
+      animation: wave 1s ease-in-out infinite;
+    }
+
+    .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+    .bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+    .bar:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+    .bar:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    #speaking-text {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <div id="box">
+      <!-- Speaking indicator -->
+      <div id="speaking-bar">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <span id="speaking-text">Speaking...</span>
+      </div>
+
+      <!-- Quick phrases -->
+      <div id="phrases">
+        <button class="phrase-btn" onclick="speakPhrase('Yes')">Yes</button>
+        <button class="phrase-btn" onclick="speakPhrase('No')">No</button>
+        <button class="phrase-btn" onclick="speakPhrase('Can you repeat that?')">Repeat that</button>
+        <button class="phrase-btn" onclick="speakPhrase('One second please')">One sec</button>
+        <button class="phrase-btn" onclick="speakPhrase('Sure')">Sure</button>
+        <button class="phrase-btn" onclick="speakPhrase('Got it')">Got it</button>
+        <button class="phrase-btn" onclick="speakPhrase('Hang on')">Hang on</button>
+        <button class="phrase-btn" onclick="speakPhrase('Good point')">Good point</button>
+        <button class="phrase-btn" onclick="speakPhrase('Let me think about that')">Let me think</button>
+        <button class="phrase-btn" onclick="speakPhrase('I agree')">I agree</button>
+        <button class="phrase-btn" onclick="speakPhrase('Can you clarify?')">Can you clarify?</button>
+        <button class="phrase-btn" onclick="speakPhrase('Be right back')">BRB</button>
+      </div>
+
+      <!-- Text input -->
+      <div id="input-row">
+        <input
+          id="text-input"
+          type="text"
+          placeholder="Type to speak..."
+          autocomplete="off"
+          onkeydown="handleKey(event)"
+        />
+        <button id="speak-btn" onclick="speakInput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    let voice = null;
+    let rate = 1.0;
+    let pitch = 1.0;
+    let volume = 1.0;
+
+    const speakingBar = document.getElementById('speaking-bar');
+    const speakingText = document.getElementById('speaking-text');
+    const input = document.getElementById('text-input');
+
+    // Focus input on load
+    setTimeout(() => input.focus(), 300);
+
+    function speak(text) {
+      if (!text.trim()) return;
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = rate;
+      utter.pitch = pitch;
+      utter.volume = volume;
+
+      if (voice) {
+        const voices = window.speechSynthesis.getVoices();
+        const match = voices.find(v => v.name === voice);
+        if (match) utter.voice = match;
+      }
+
+      utter.onstart = () => {
+        speakingBar.classList.add('active');
+        speakingText.textContent = `"${text.length > 40 ? text.slice(0, 40) + '…' : text}"`;
+      };
+
+      utter.onend = () => {
+        speakingBar.classList.remove('active');
+        input.focus();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakInput() {
+      const text = input.value.trim();
+      if (text) {
+        speak(text);
+        ipcRenderer.send('speak', { text });
+        input.value = '';
+      }
+    }
+
+    function speakPhrase(text) {
+      speak(text);
+      ipcRenderer.send('speak', { text });
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') speakInput();
+    }
+
+    ipcRenderer.on('settings', (event, { voice: v, rate: r, pitch: p, volume: vol }) => {
+      if (v !== undefined) voice = v;
+      if (r !== undefined) rate = r;
+      if (p !== undefined) pitch = p;
+      if (vol !== undefined) volume = vol;
+    });
+
+    ipcRenderer.on('speak', (event, { text }) => {
+      speak(text);
+    });
+  </script>
+</body>
+</html>
