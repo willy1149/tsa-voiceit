@@ -1,68 +1,351 @@
-# VoiceIt 🔊
-### Text-to-Speech Meeting Overlay — TSA Software Development
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
-A floating overlay that lets deaf users **type and be heard** in any meeting. Type a message or tap a quick phrase — it speaks out loud through your speakers so everyone on the call hears a voice.
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
----
+    :root {
+      --accent: #6b7280;
+      --accent2: #374151;
+      --bg: rgba(10, 10, 18, 0.88);
+      --text: rgba(255,255,255,0.85);
+      --muted: rgba(255,255,255,0.6);
+      --red: #ff5f6d;
+    }
 
-## Setup & Run
+    body {
+      background: transparent;
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or higher)
+    #wrap {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 10px 14px;
+    }
 
-### Install & Launch
+    #box {
+      width: 100%;
+      background: var(--bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 18px;
+      border: 1px solid rgba(107,114,128,0.2);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-```bash
-npm install
-npm start
-```
+    /* Overlay header - removed */
 
-Two windows appear:
-- **Floating overlay** — sits above Zoom/Meet with a text input and quick phrase buttons
-- **Control panel** — voice picker, speed/pitch/volume sliders, custom phrases, spoken history
+    #settings-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid rgba(107,114,128,0.25);
+      background: rgba(107,114,128,0.08);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    #settings-btn:hover {
+      background: rgba(107,114,128,0.2);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
 
----
+    #close-btn {
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,95,109,0.3);
+      background: rgba(255,95,109,0.1);
+      color: var(--red);
+      font-size: 12px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    #close-btn:hover {
+      background: rgba(255,95,109,0.2);
+    }
 
-## How to Use
+    /* Quick phrases */
+    #phrases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+    }
 
-1. Join your Zoom/Teams/Meet call as normal
-2. Launch VoiceIt — the overlay floats above your meeting window
-3. **Type** what you want to say and press Enter (or click the speaker button)
-4. **Or tap** a quick phrase button for instant responses
-5. Your speakers play the voice — everyone on the call hears it
+    .phrase-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(107,114,128,0.25);
+      background: rgba(107,114,128,0.08);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-app-region: no-drag;
+    }
 
----
+    .phrase-btn:hover {
+      background: rgba(107,114,128,0.2);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
 
-## Features
+    .phrase-btn:active {
+      transform: scale(0.96);
+    }
 
-| Feature | Details |
-|---|---|
-| ⌨️ Type-to-speak | Type anything, press Enter to speak instantly |
-| ⚡ Quick phrases | 12 built-in one-tap responses |
-| 🎙️ Voice picker | Choose from all system voices |
-| 🎛️ Voice tuning | Adjust speed, pitch, and volume |
-| 📝 Custom phrases | Save your own frequently used phrases |
-| 📋 Spoken history | Log of everything spoken, copyable |
-| 🪟 Always on top | Floats over Zoom, Teams, Meet, any app |
+    /* Input row */
+    #input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      -webkit-app-region: no-drag;
+    }
 
----
+    #text-input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      outline: none;
+      -webkit-app-region: no-drag;
+      transition: border-color 0.2s;
+    }
 
-## Tech Stack
+    #text-input::placeholder { color: var(--muted); }
+    #text-input:focus { border-color: var(--accent); }
 
-- **Electron** — cross-platform desktop app
-- **Web Speech Synthesis API** — built-in browser TTS, no API key needed
-- **HTML/CSS/JS** — no frameworks
+    #speak-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
 
----
+    #speak-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+    #speak-btn:active { transform: scale(0.96); }
+    #speak-btn svg { width: 20px; height: 20px; }
 
-## TSA Documentation Notes
+    /* Speaking indicator */
+    #speaking-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 0;
+    }
 
-**Problem Solved:** Deaf and hard-of-hearing users can follow meetings using captions, but have no good way to speak back. Typing in a chat box is slow and breaks conversation flow. VoiceIt gives deaf users a voice in real-time conversations.
+    #speaking-bar.active { display: flex; }
 
-**Who it helps:** ~15% of adults have some degree of hearing loss. In professional settings, this creates a significant communication barrier that no major meeting platform has solved from the deaf user's perspective.
+    .bar {
+      width: 3px;
+      border-radius: 3px;
+      background: var(--accent);
+      animation: wave 1s ease-in-out infinite;
+    }
 
-**Design choices:**
-- Quick phrase buttons reduce response time to under 1 second
-- Outfit font chosen for readability and modern feel
-- Minimal, non-intrusive overlay so it doesn't block the meeting UI
-- All processing is local — no data leaves the device
+    .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+    .bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+    .bar:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+    .bar:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    #speaking-text {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <div id="box">
+      <!-- Speaking indicator -->
+      <div id="speaking-bar">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <span id="speaking-text">Speaking...</span>
+      </div>
+
+      <!-- Quick phrases -->
+      <div id="phrases">
+      </div>
+
+      <!-- Text input -->
+      <div id="input-row">
+        <button id="settings-btn">⚙️</button>
+        <input
+          id="text-input"
+          type="text"
+          placeholder="Type to speak..."
+          autocomplete="off"
+          onkeydown="handleKey(event)"
+        />
+        <button id="speak-btn" onclick="speakInput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </button>
+        <button id="close-btn" onclick="ipcRenderer.send('quit')">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    let voice = null;
+    let rate = 1.0;
+    let pitch = 1.0;
+    let volume = 1.0;
+
+    const speakingBar = document.getElementById('speaking-bar');
+    const speakingText = document.getElementById('speaking-text');
+    const input = document.getElementById('text-input');
+
+    const defaultPhrases = [
+      'Yes', 'No', 'Can you repeat that?', 'One second please', 'Sure', 'Got it', 'Hang on', 'Good point', 'Let me think about that', 'I agree', 'Can you clarify?', 'Be right back'
+    ];
+    let commonPhrases = defaultPhrases.slice();
+    let customPhrases = [];
+    let phrases = commonPhrases.concat(customPhrases);
+
+    // Focus input on load
+    setTimeout(() => input.focus(), 300);
+
+    document.getElementById('settings-btn').onclick = () => ipcRenderer.send('toggle-control');
+
+    function renderPhrases() {
+      const container = document.getElementById('phrases');
+      container.innerHTML = '';
+      const allPhrases = phrases.filter(p => p.trim());
+      allPhrases.forEach(phrase => {
+        const btn = document.createElement('button');
+        btn.className = 'phrase-btn';
+        btn.textContent = phrase;
+        btn.onclick = () => speakPhrase(phrase);
+        container.appendChild(btn);
+      });
+    }
+
+    function speak(text) {
+      if (!text.trim()) return;
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = rate;
+      utter.pitch = pitch;
+      utter.volume = volume;
+
+      if (voice) {
+        const voices = window.speechSynthesis.getVoices();
+        const match = voices.find(v => v.name === voice);
+        if (match) utter.voice = match;
+      }
+
+      utter.onstart = () => {
+        speakingBar.classList.add('active');
+        speakingText.textContent = `"${text.length > 40 ? text.slice(0, 40) + '…' : text}"`;
+      };
+
+      utter.onend = () => {
+        speakingBar.classList.remove('active');
+        input.focus();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakInput() {
+      const text = input.value.trim();
+      if (text) {
+        speak(text);
+        ipcRenderer.send('speak', { text });
+        input.value = '';
+      }
+    }
+
+    function speakPhrase(text) {
+      speak(text);
+      ipcRenderer.send('speak', { text });
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') speakInput();
+    }
+
+    ipcRenderer.on('settings', (event, { voice: v, rate: r, pitch: p, volume: vol }) => {
+      if (v !== undefined) voice = v;
+      if (r !== undefined) rate = r;
+      if (p !== undefined) pitch = p;
+      if (vol !== undefined) volume = vol;
+    });
+
+    ipcRenderer.on('speak', (event, { text }) => {
+      speak(text);
+    });
+
+    ipcRenderer.on('update-custom-phrases', (event, phrases) => {
+      customPhrases = phrases;
+      renderPhrases();
+    });
+
+    ipcRenderer.on('update-common-phrases', (event, phrases) => {
+      commonPhrases = phrases;
+      renderPhrases();
+    });
+
+    ipcRenderer.on('update-phrases', (event, phrasesList) => {
+      phrases = phrasesList;
+      renderPhrases();
+    });
+
+    renderPhrases();
+  </script>
+</body>
+</html>

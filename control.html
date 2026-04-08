@@ -3,277 +3,446 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --accent: #a78bfa;
-      --accent2: #f472b6;
-      --bg: rgba(10, 10, 18, 0.88);
+      --bg: #0d0d14;
+      --surface: #16161f;
+      --surface2: #1e1e2a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #6b7280;
+      --accent2: #374151;
+      --text: rgba(255,255,255,0.85);
+      --muted: rgba(255,255,255,0.6);
+      --red: #ff5f6d;
     }
 
     body {
       background: transparent;
       font-family: 'Outfit', sans-serif;
-      overflow: hidden;
+      color: var(--text);
       -webkit-app-region: drag;
       user-select: none;
     }
 
-    #wrap {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      align-items: flex-end;
-      padding: 10px 14px;
-    }
-
-    #box {
+    #panel {
       width: 100%;
+      height: 100vh;
       background: var(--bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 18px;
-      border: 1px solid rgba(167,139,250,0.2);
-      padding: 14px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
     }
 
-    /* Quick phrases */
-    #phrases {
+    /* Titlebar */
+    #titlebar {
+      padding: 16px 20px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      -webkit-app-region: no-drag;
-    }
-
-    .phrase-btn {
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(167,139,250,0.25);
-      background: rgba(167,139,250,0.08);
-      color: rgba(255,255,255,0.7);
-      font-family: 'Outfit', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-      -webkit-app-region: no-drag;
-    }
-
-    .phrase-btn:hover {
-      background: rgba(167,139,250,0.2);
-      border-color: var(--accent);
-      color: white;
-    }
-
-    .phrase-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Input row */
-    #input-row {
-      display: flex;
-      gap: 8px;
       align-items: center;
-      -webkit-app-region: no-drag;
+      justify-content: flex-start;
+      border-bottom: 1px solid var(--border);
     }
 
-    #text-input {
-      flex: 1;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 10px 14px;
-      color: white;
-      font-family: 'Outfit', sans-serif;
-      font-size: 15px;
-      font-weight: 400;
-      outline: none;
-      -webkit-app-region: no-drag;
-      transition: border-color 0.2s;
+    #logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
     }
 
-    #text-input::placeholder { color: rgba(255,255,255,0.25); }
-    #text-input:focus { border-color: var(--accent); }
-
-    #speak-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: none;
+    #logo-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #close-btn {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       -webkit-app-region: no-drag;
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-
-    #speak-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
-    #speak-btn:active { transform: scale(0.96); }
-    #speak-btn svg { width: 20px; height: 20px; }
-
-    /* Speaking indicator */
-    #speaking-bar {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 2px 0;
-    }
-
-    #speaking-bar.active { display: flex; }
-
-    .bar {
-      width: 3px;
-      border-radius: 3px;
-      background: var(--accent);
-      animation: wave 1s ease-in-out infinite;
-    }
-
-    .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
-    .bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
-    .bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
-    .bar:nth-child(4) { height: 14px; animation-delay: 0.3s; }
-    .bar:nth-child(5) { height: 8px; animation-delay: 0.4s; }
-
-    @keyframes wave {
-      0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
-      50% { transform: scaleY(1); opacity: 1; }
-    }
-
-    #speaking-text {
+      color: var(--muted);
       font-size: 13px;
-      color: var(--accent);
-      font-weight: 500;
+      transition: all 0.15s;
+      margin-left: auto;
     }
+    #close-btn:hover { background: rgba(255,95,109,0.1); border-color: var(--red); color: var(--red); }
+
+    /* Content */
+    #content {
+      flex: 1;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Voice selector */
+    select {
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    select:hover { border-color: rgba(255,255,255,0.15); }
+
+    /* Sliders */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      -webkit-app-region: no-drag;
+    }
+
+    .slider-label {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 52px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+    }
+
+    .slider-val {
+      font-size: 12px;
+      color: var(--accent);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* Custom phrases */
+    #custom-phrases {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .custom-phrase-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      -webkit-app-region: no-drag;
+    }
+
+    .custom-phrase-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      outline: none;
+      -webkit-app-region: no-drag;
+    }
+
+    .custom-phrase-row input:focus { border-color: var(--accent); }
+
+    .speak-phrase-btn {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(107,114,128,0.3);
+      background: rgba(107,114,128,0.1);
+      color: var(--accent);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .speak-phrase-btn:hover { background: rgba(107,114,128,0.2); }
+
+    .delete-btn {
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,95,109,0.3);
+      background: rgba(255,95,109,0.1);
+      color: var(--red);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+    }
+    .delete-btn:hover { background: rgba(255,95,109,0.2); }
+
+    #add-phrase-btn {
+      width: 100%;
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(107,114,128,0.3);
+      background: rgba(107,114,128,0.1);
+      color: var(--accent);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    #add-phrase-btn:hover { background: rgba(167,139,250,0.2); }
+
+    /* History */
+    #history {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.7;
+      max-height: 90px;
+      overflow-y: auto;
+      color: var(--muted);
+    }
+
+    #history:empty::before {
+      content: 'Spoken phrases will appear here...';
+      color: rgba(255,255,255,0.15);
+      font-style: italic;
+    }
+
+    hr { border: none; border-top: 1px solid var(--border); }
+
+    /* Bottom actions */
+    #actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      transition: all 0.15s;
+    }
+    .action-btn:hover { background: var(--surface2); color: var(--text); }
+    .action-btn.danger:hover { background: rgba(255,95,109,0.1); border-color: var(--red); color: var(--red); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
   </style>
 </head>
 <body>
-  <div id="wrap">
-    <div id="box">
-      <!-- Speaking indicator -->
-      <div id="speaking-bar">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <span id="speaking-text">Speaking...</span>
+<div id="panel">
+  <div id="titlebar">
+    <div id="logo">
+      <div id="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
       </div>
-
-      <!-- Quick phrases -->
-      <div id="phrases">
-        <button class="phrase-btn" onclick="speakPhrase('Yes')">Yes</button>
-        <button class="phrase-btn" onclick="speakPhrase('No')">No</button>
-        <button class="phrase-btn" onclick="speakPhrase('Can you repeat that?')">Repeat that</button>
-        <button class="phrase-btn" onclick="speakPhrase('One second please')">One sec</button>
-        <button class="phrase-btn" onclick="speakPhrase('Sure')">Sure</button>
-        <button class="phrase-btn" onclick="speakPhrase('Got it')">Got it</button>
-        <button class="phrase-btn" onclick="speakPhrase('Hang on')">Hang on</button>
-        <button class="phrase-btn" onclick="speakPhrase('Good point')">Good point</button>
-        <button class="phrase-btn" onclick="speakPhrase('Let me think about that')">Let me think</button>
-        <button class="phrase-btn" onclick="speakPhrase('I agree')">I agree</button>
-        <button class="phrase-btn" onclick="speakPhrase('Can you clarify?')">Can you clarify?</button>
-        <button class="phrase-btn" onclick="speakPhrase('Be right back')">BRB</button>
-      </div>
-
-      <!-- Text input -->
-      <div id="input-row">
-        <input
-          id="text-input"
-          type="text"
-          placeholder="Type to speak..."
-          autocomplete="off"
-          onkeydown="handleKey(event)"
-        />
-        <button id="speak-btn" onclick="speakInput()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-          </svg>
-        </button>
-      </div>
+      <div id="logo-text">VoiceIt</div>
     </div>
+    <button id="close-btn" onclick="ipcRenderer.send('hide-control')">✕</button>
   </div>
 
-  <script>
-    const { ipcRenderer } = require('electron');
+  <div id="content">
 
-    let voice = null;
-    let rate = 1.0;
-    let pitch = 1.0;
-    let volume = 1.0;
+    <!-- Voice -->
+    <div>
+      <div class="label">Voice</div>
+      <select id="voice-select" onchange="updateSettings()">
+        <option value="">Default</option>
+      </select>
+    </div>
 
-    const speakingBar = document.getElementById('speaking-bar');
-    const speakingText = document.getElementById('speaking-text');
-    const input = document.getElementById('text-input');
+    <!-- Sliders -->
+    <div>
+      <div class="label">Voice Settings</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="slider-row">
+          <span class="slider-label">Speed</span>
+          <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" oninput="updateSettings()">
+          <span class="slider-val" id="rate-val">1.0x</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Pitch</span>
+          <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" oninput="updateSettings()">
+          <span class="slider-val" id="pitch-val">1.0</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Volume</span>
+          <input type="range" id="volume" min="0" max="1" step="0.05" value="1" oninput="updateSettings()">
+          <span class="slider-val" id="volume-val">100%</span>
+        </div>
+      </div>
+    </div>
 
-    // Focus input on load
-    setTimeout(() => input.focus(), 300);
+    <hr>
 
-    function speak(text) {
-      if (!text.trim()) return;
-      window.speechSynthesis.cancel();
+    <!-- Phrases -->
+    <div>
+      <div class="label">Phrases</div>
+      <div id="phrases"></div>
+      <button id="add-phrase-btn" onclick="addPhrase()">+ Add phrase</button>
+    </div>
 
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = rate;
-      utter.pitch = pitch;
-      utter.volume = volume;
+    <hr>
 
-      if (voice) {
-        const voices = window.speechSynthesis.getVoices();
-        const match = voices.find(v => v.name === voice);
-        if (match) utter.voice = match;
-      }
+    <!-- History -->
+    <div>
+      <div class="label">Spoken History</div>
+      <div id="history"></div>
+    </div>
 
-      utter.onstart = () => {
-        speakingBar.classList.add('active');
-        speakingText.textContent = `"${text.length > 40 ? text.slice(0, 40) + '…' : text}"`;
-      };
+    <!-- Actions -->
+    <div id="actions">
+      <button class="action-btn" onclick="copyHistory()">📋 Copy Log</button>
+    </div>
 
-      utter.onend = () => {
-        speakingBar.classList.remove('active');
-        input.focus();
-      };
+  </div>
+</div>
 
-      window.speechSynthesis.speak(utter);
-    }
+<script>
+  const { ipcRenderer } = require('electron');
 
-    function speakInput() {
-      const text = input.value.trim();
-      if (text) {
-        speak(text);
-        ipcRenderer.send('speak', { text });
-        input.value = '';
-      }
-    }
+  const voiceSelect = document.getElementById('voice-select');
+  const history = document.getElementById('history');
+  let historyLines = [];
+  let phrases = ['Yes', 'No', 'Can you repeat that?', 'One second please', 'Sure', 'Got it', 'Hang on', 'Good point', 'Let me think about that', 'I agree', 'Can you clarify?', 'Be right back', 'Thank you', 'Can we slow down?'];
 
-    function speakPhrase(text) {
-      speak(text);
-      ipcRenderer.send('speak', { text });
-    }
-
-    function handleKey(e) {
-      if (e.key === 'Enter') speakInput();
-    }
-
-    ipcRenderer.on('settings', (event, { voice: v, rate: r, pitch: p, volume: vol }) => {
-      if (v !== undefined) voice = v;
-      if (r !== undefined) rate = r;
-      if (p !== undefined) pitch = p;
-      if (vol !== undefined) volume = vol;
+  // Load voices
+  function loadVoices() {
+    const voices = window.speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '<option value="">Default</option>';
+    voices.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      voiceSelect.appendChild(opt);
     });
+  }
 
-    ipcRenderer.on('speak', (event, { text }) => {
-      speak(text);
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+
+  function updateSettings() {
+    const rate = parseFloat(document.getElementById('rate').value);
+    const pitch = parseFloat(document.getElementById('pitch').value);
+    const volume = parseFloat(document.getElementById('volume').value);
+    const voice = voiceSelect.value;
+
+    document.getElementById('rate-val').textContent = rate.toFixed(1) + 'x';
+    document.getElementById('pitch-val').textContent = pitch.toFixed(1);
+    document.getElementById('volume-val').textContent = Math.round(volume * 100) + '%';
+
+    ipcRenderer.send('settings', { voice, rate, pitch, volume });
+  }
+
+  function renderPhrases() {
+    const container = document.getElementById('phrases');
+    container.innerHTML = '';
+    phrases.forEach((phrase, i) => {
+      const row = document.createElement('div');
+      row.className = 'custom-phrase-row';
+      row.innerHTML = `
+        <input type="text" value="${phrase}" onchange="updatePhrase(${i}, this.value)" placeholder="Enter phrase..."/>
+        <button class="speak-phrase-btn" onclick="speakPhrase(${i})">▶ Speak</button>
+        <button class="delete-btn" onclick="deletePhrase(${i})">✕</button>
+      `;
+      container.appendChild(row);
     });
-  </script>
+    ipcRenderer.send('update-phrases', phrases);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function addPhrase() {
+    phrases.push('New phrase');
+    renderPhrases();
+  }
+
+  function updatePhrase(i, value) {
+    phrases[i] = value;
+    ipcRenderer.send('update-phrases', phrases);
+  }
+
+  function speakPhrase(i) {
+    const text = phrases[i];
+    if (text) ipcRenderer.send('speak', { text });
+  }
+
+  function deletePhrase(i) {
+    phrases.splice(i, 1);
+    renderPhrases();
+  }
+
+  ipcRenderer.on('spoken', (event, { text }) => {
+    historyLines.push(text);
+    if (historyLines.length > 50) historyLines.shift();
+    history.textContent = historyLines.join(' · ');
+    history.scrollTop = history.scrollHeight;
+  });
+
+  function copyHistory() {
+    if (historyLines.length) {
+      require('electron').clipboard.writeText(historyLines.join('\n'));
+    }
+  }
+
+  renderPhrases();
+  updateSettings();
+</script>
 </body>
 </html>

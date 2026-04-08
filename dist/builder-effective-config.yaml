@@ -1,0 +1,9 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.voiceit.app
+productName: VoiceIt
+win:
+  target: nsis
+files: []
+electronVersion: 28.3.3
